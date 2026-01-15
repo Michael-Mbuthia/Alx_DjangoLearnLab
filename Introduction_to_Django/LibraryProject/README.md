@@ -1,4 +1,3 @@
-
 # LibraryProject README
 
 ## Overview
