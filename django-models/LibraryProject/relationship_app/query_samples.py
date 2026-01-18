@@ -50,6 +50,45 @@ def get_books_by_author_alt(author_id):
     return books
 
 
+def get_books_by_author_name(author_name):
+    """
+    Query all books by a specific author using author name.
+    
+    Args:
+        author_name: The name of the author
+        
+    Returns:
+        QuerySet of Book objects by the specified author
+    """
+    try:
+        author = Author.objects.get(name=author_name)
+        books = author.books.all()  # Using reverse relation (related_name='books')
+        print(f"\nBooks by {author.name}:")
+        for book in books:
+            print(f"  - {book.title}")
+        return books
+    except Author.DoesNotExist:
+        print(f"Author with name '{author_name}' not found.")
+        return None
+
+
+def get_books_filter_by_author_object(author):
+    """
+    Query books using filter with author object instead of author_id.
+    
+    Args:
+        author: The Author object
+        
+    Returns:
+        QuerySet of Book objects by the specified author
+    """
+    books = Book.objects.filter(author=author)
+    print(f"\nBooks by {author.name}:")
+    for book in books:
+        print(f"  - {book.title}")
+    return books
+
+
 # ============================================================================
 # QUERY 2: List all books in a library
 # ============================================================================
