@@ -207,6 +207,26 @@ def get_library_for_librarian(librarian_id):
         return None
 
 
+def get_librarian_for_library_object(library):
+    """
+    Retrieve the librarian for a specific library object using OneToOne relationship.
+    Uses Librarian.objects.get(library=...) to query by library object.
+    
+    Args:
+        library: The Library object
+        
+    Returns:
+        Librarian object associated with the specified library
+    """
+    try:
+        librarian = Librarian.objects.get(library=library)
+        print(f"\nLibrarian of {library.name}: {librarian.name}")
+        return librarian
+    except Librarian.DoesNotExist:
+        print(f"No librarian assigned to {library.name}.")
+        return None
+
+
 # ============================================================================
 # ADDITIONAL COMPLEX QUERIES
 # ============================================================================
