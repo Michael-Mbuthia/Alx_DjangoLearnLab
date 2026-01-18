@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Detail</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #555;
+            margin-top: 20px;
+        }
+        ul {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        li {
+            margin: 10px 0;
+            padding: 10px;
+            border-left: 3px solid #28a745;
+            padding-left: 15px;
+        }
+        .no-books {
+            color: #999;
+            font-style: italic;
+        }
+        .back-link {
+            margin-top: 20px;
+        }
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>📖 Library: {{ library.name }}</h1>
+    
+    <h2>Books in Library:</h2>
+    {% if library.books.all %}
+        <ul>
+            {% for book in library.books.all %}
+            <li>
+                <strong>{{ book.title }}</strong> by {{ book.author.name }}
+                {% if book.publication_year %}
+                    (Published {{ book.publication_year }})
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="no-books">No books available in this library.</p>
+    {% endif %}
+    
+    <div class="back-link">
+        <p><a href="{% url 'relationship_app:library_list' %}">← Back to Libraries</a> | <a href="{% url 'relationship_app:list_books' %}">View All Books</a></p>
+    </div>
+</body>
+</html>
