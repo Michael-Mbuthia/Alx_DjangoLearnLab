@@ -1,11 +1,9 @@
 from django.shortcuts import render, redirect
 from django.views.generic import ListView
 from django.views.generic.detail import DetailView
-from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
-from django.urls import reverse_lazy
 from .models import Book
 from .models import Library
 
@@ -53,28 +51,6 @@ class LibraryListView(ListView):
 # ============================================================================
 # AUTHENTICATION VIEWS: User Login, Logout, and Registration
 # ============================================================================
-class UserLoginView(LoginView):
-    """
-    Class-based view for user login using Django's built-in LoginView.
-    Handles user authentication and session management.
-    """
-    template_name = 'relationship_app/login.html'
-    success_url = reverse_lazy('relationship_app:list_books')
-    
-    def get_success_url(self):
-        """Redirect to list_books after successful login."""
-        return reverse_lazy('relationship_app:list_books')
-
-
-class UserLogoutView(LogoutView):
-    """
-    Class-based view for user logout using Django's built-in LogoutView.
-    Clears user session and redirects to logout page.
-    """
-    template_name = 'relationship_app/logout.html'
-    next_page = reverse_lazy('relationship_app:login')
-
-
 def register_user(request):
     """
     Function-based view for user registration.
