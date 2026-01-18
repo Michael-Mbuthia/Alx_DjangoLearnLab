@@ -75,6 +75,29 @@ def get_books_in_library(library_id):
         return None
 
 
+def get_books_in_library_by_name(library_name):
+    """
+    Retrieve all books in a specific library by library name.
+    Alternative method using library name instead of ID.
+    
+    Args:
+        library_name: The name of the library
+        
+    Returns:
+        QuerySet of Book objects in the specified library
+    """
+    try:
+        library = Library.objects.get(name=library_name)
+        books = library.books.all()  # Using ManyToMany relation
+        print(f"\nBooks in {library.name}:")
+        for book in books:
+            print(f"  - {book.title} by {book.author.name}")
+        return books
+    except Library.DoesNotExist:
+        print(f"Library with name '{library_name}' not found.")
+        return None
+
+
 # Alternative method using filter on Book through ManyToMany
 def get_libraries_for_book(book_id):
     """
