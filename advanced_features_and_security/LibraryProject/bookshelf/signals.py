@@ -6,6 +6,28 @@ from django.dispatch import receiver
 from .models import Book
 
 
+# Permissions & Groups guide
+# --------------------------
+# 1) Permissions are defined on the Book model via Book.Meta.permissions:
+#      can_view, can_create, can_edit, can_delete
+#
+# 2) This module automatically creates Groups and assigns those permissions
+#    after migrations (post_migrate), so they appear in the Django admin.
+#
+#    Groups created:
+#      - Viewers: can_view
+#      - Editors: can_view, can_create, can_edit
+#      - Admins:  can_view, can_create, can_edit, can_delete
+#
+# 3) Usage examples in code:
+#      @permission_required('bookshelf.can_edit')
+#      request.user.has_perm('bookshelf.can_delete')
+#
+# Notes:
+# - We use .permissions.add(...) instead of .set(...) so any extra permissions
+#   you assign manually in the Django admin are preserved.
+
+
 @receiver(post_migrate)
 def ensure_groups_and_permissions(sender, **kwargs):
     """Create default groups and assign custom Book permissions.

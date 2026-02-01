@@ -49,6 +49,14 @@ class Book(models.Model):
     publication_year = models.IntegerField(default=2000)
 
     class Meta:
+        # Custom permissions for the Book model.
+        #
+        # These codenames are referenced when assigning permissions to Groups
+        # (see bookshelf/signals.py) and can also be used with decorators like:
+        #   @permission_required('bookshelf.can_edit')
+        #
+        # Keep the codenames exactly as listed here:
+        #   can_view, can_create, can_edit, can_delete
         permissions = [
             ('can_view', 'Can view book'),
             ('can_create', 'Can create book'),
