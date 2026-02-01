@@ -1,8 +1,6 @@
 from django.db import models
-from django.contrib.auth.models import User
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-
+from django.conf import settings
+    
 
 class Author(models.Model):
     name = models.CharField(max_length=200)
@@ -57,7 +55,7 @@ class UserProfile(models.Model):
         ('Member', 'Member'),
     ]
     
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile')
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='Member')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -69,22 +67,4 @@ class UserProfile(models.Model):
         verbose_name_plural = "User Profiles"
 
 
-# ============================================================================
-# SIGNALS: Automatically Create UserProfile on User Creation
-# ============================================================================
-@receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
-    """
-    Signal handler that automatically creates a UserProfile when a new User is created.
-    """
-    if created:
-        UserProfile.objects.create(user=instance)
 
-
-@receiver(post_save, sender=User)
-def save_user_profile(sender, instance, **kwargs):
-    """
-    Signal handler that automatically saves the UserProfile when the User is saved.
-    """
-    if hasattr(instance, 'profile'):
-        instance.profile.save()
