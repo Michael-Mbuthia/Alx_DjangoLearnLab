@@ -7,7 +7,11 @@ from .models import Author
 class BookInputForm(forms.Form):
     """Validates user input for creating/updating a Book.
 
-    Uses Django's validation system to avoid trusting raw request.POST values.
+        Security notes:
+        - We validate and normalize input (e.g., stripping title) instead of trusting
+            raw request.POST values.
+        - author is a ModelChoiceField, so an attacker cannot inject arbitrary SQL
+            via an "author" parameter; Django ORM performs safe parameterization.
     """
 
     title = forms.CharField(max_length=300, required=True)

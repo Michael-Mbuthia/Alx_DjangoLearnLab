@@ -35,11 +35,16 @@ ALLOWED_HOSTS = []
 # Security hardening
 # -----------------------------------------------------------------------------
 # Browser-side protections
+# - SECURE_BROWSER_XSS_FILTER: enables legacy browser XSS filtering.
+# - X_FRAME_OPTIONS: prevents clickjacking by disallowing framing.
+# - SECURE_CONTENT_TYPE_NOSNIFF: prevents MIME-sniffing.
 SECURE_BROWSER_XSS_FILTER = True
 X_FRAME_OPTIONS = 'DENY'
 SECURE_CONTENT_TYPE_NOSNIFF = True
 
 # Cookies over HTTPS only
+# These should be True in production to ensure cookies are only sent via HTTPS.
+# If you test locally over plain HTTP, login/CSRF cookies may not be set.
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
 
@@ -58,6 +63,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'csp.middleware.CSPMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -66,6 +72,31 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+
+# -----------------------------------------------------------------------------
+# Content Security Policy (CSP)
+# -----------------------------------------------------------------------------
+# Baseline policy to reduce XSS risk. Adjust as needed if you later add external
+# CDNs or inline scripts.
+CSP_DEFAULT_SRC = ("'self'",)
+
+# This project uses inline <style> blocks in templates; keep 'unsafe-inline'
+# for styles unless you refactor to external CSS (preferred).
+CSP_STYLE_SRC = ("'self'", "'unsafe-inline'",)
+
+# Disallow inline scripts by default. This is a core XSS mitigation.
+CSP_SCRIPT_SRC = ("'self'",)
+
+# Allow self-hosted images and data URLs (common for admin/icons).
+CSP_IMG_SRC = ("'self'", "data:",)
+
+# Tighten other directives.
+CSP_FONT_SRC = ("'self'",)
+CSP_OBJECT_SRC = ("'none'",)
+CSP_BASE_URI = ("'self'",)
+CSP_FRAME_ANCESTORS = ("'none'",)
+CSP_FORM_ACTION = ("'self'",)
 
 ROOT_URLCONF = 'LibraryProject.urls'
 
