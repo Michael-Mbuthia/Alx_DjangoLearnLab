@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Books</title>
+</head>
+<body>
+    <h1>Books</h1>
+
+    {#
+      This template is used by bookshelf.views.book_list and bookshelf.views.book_search.
+
+      Security notes:
+      - Output is escaped by Django templates by default, reducing XSS risk.
+      - If you add POST forms to this page later, include {% csrf_token %}.
+    #}
+
+    <form method="get">
+        <label for="id_query">Search:</label>
+        <input id="id_query" name="query" type="text" value="{{ query|default:'' }}" />
+        <button type="submit">Search</button>
+    </form>
+
+    <hr />
+
+    {% if books %}
+        <ul>
+            {% for book in books %}
+                <li>
+                    <strong>{{ book.title }}</strong>
+                    — {{ book.author }}
+                    {% if book.publication_year %}({{ book.publication_year }}){% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No books found.</p>
+    {% endif %}
+</body>
+</html>
