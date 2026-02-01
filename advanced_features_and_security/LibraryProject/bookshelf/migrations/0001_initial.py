@@ -8,6 +8,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
+        ('bookshelf', '0000_customuser'),
     ]
 
     operations = [
