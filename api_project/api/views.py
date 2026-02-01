@@ -18,14 +18,16 @@ from .serializers import BookSerializer
 
 
 class BookList(generics.ListAPIView):
-	"""Read-only list endpoint; requires authentication."""
+    """Read-only list endpoint; requires authentication."""
+
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     permission_classes = [IsAuthenticated]
 
 
 class BookViewSet(viewsets.ModelViewSet):
-	"""Full CRUD endpoint with read vs write permission rules."""
+    """Full CRUD endpoint with read vs write permission rules."""
+
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     permission_classes = [IsAuthenticatedReadOnlyOrAdminWrite]
