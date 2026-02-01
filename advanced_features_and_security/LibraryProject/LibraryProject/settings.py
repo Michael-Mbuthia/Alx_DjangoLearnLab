@@ -10,6 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
+
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -23,9 +25,23 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-9*o1c^^(5j1+l#d=sf^tyv8zo4gw2z6x4f&6hi&qm4gk--b_fg'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Default is False; enable locally with: DJANGO_DEBUG=True
+DEBUG = os.getenv('DJANGO_DEBUG', 'False').lower() in ('1', 'true', 'yes', 'on')
 
 ALLOWED_HOSTS = []
+
+
+# -----------------------------------------------------------------------------
+# Security hardening
+# -----------------------------------------------------------------------------
+# Browser-side protections
+SECURE_BROWSER_XSS_FILTER = True
+X_FRAME_OPTIONS = 'DENY'
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+# Cookies over HTTPS only
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
 
 
 # Application definition
