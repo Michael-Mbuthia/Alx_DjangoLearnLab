@@ -5,9 +5,11 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.decorators import permission_required
 from django.contrib.auth import login
+from django.shortcuts import get_object_or_404
 from .models import Book
 from .models import Library
 from .models import Author
+from .forms import BookInputForm
 
 
 # ============================================================================
@@ -219,24 +221,21 @@ def add_book(request):
         Rendered template with form to add book or redirect after successful creation
     """
     if request.method == 'POST':
-        title = request.POST.get('title')
-        author_id = request.POST.get('author')
-        
-        if title and author_id:
-            try:
-                author = Author.objects.get(id=author_id)
-                book = Book.objects.create(title=title, author=author)
-                return redirect('relationship_app:list_books')
-            except Author.DoesNotExist:
-                error_message = "Selected author does not exist."
-                authors = Author.objects.all()
-                return render(request, 'relationship_app/add_book.html', 
-                            {'authors': authors, 'error': error_message})
-        else:
-            authors = Author.objects.all()
-            error_message = "Title and Author are required."
-            return render(request, 'relationship_app/add_book.html', 
-                        {'authors': authors, 'error': error_message})
+        form = BookInputForm(request.POST)
+        if form.is_valid():
+            Book.objects.create(
+                title=form.cleaned_data['title'],
+                author=form.cleaned_data['author'],
+            )
+            return redirect('relationship_app:list_books')
+
+        authors = Author.objects.all()
+        error_message = "Please correct the errors below."
+        return render(
+            request,
+            'relationship_app/add_book.html',
+            {'authors': authors, 'error': error_message, 'form_errors': form.errors},
+        )
     
     authors = Author.objects.all()
     context = {'authors': authors}
@@ -258,33 +257,23 @@ def edit_book(request, pk):
     Returns:
         Rendered template with form to edit book or redirect after successful update
     """
-    try:
-        book = Book.objects.get(pk=pk)
-    except Book.DoesNotExist:
-        return render(request, 'relationship_app/error.html', 
-                    {'error': 'Book not found.'})
+    book = get_object_or_404(Book, pk=pk)
     
     if request.method == 'POST':
-        title = request.POST.get('title')
-        author_id = request.POST.get('author')
-        
-        if title and author_id:
-            try:
-                author = Author.objects.get(id=author_id)
-                book.title = title
-                book.author = author
-                book.save()
-                return redirect('relationship_app:list_books')
-            except Author.DoesNotExist:
-                authors = Author.objects.all()
-                error_message = "Selected author does not exist."
-                return render(request, 'relationship_app/edit_book.html', 
-                            {'book': book, 'authors': authors, 'error': error_message})
-        else:
-            authors = Author.objects.all()
-            error_message = "Title and Author are required."
-            return render(request, 'relationship_app/edit_book.html', 
-                        {'book': book, 'authors': authors, 'error': error_message})
+        form = BookInputForm(request.POST)
+        if form.is_valid():
+            book.title = form.cleaned_data['title']
+            book.author = form.cleaned_data['author']
+            book.save(update_fields=['title', 'author'])
+            return redirect('relationship_app:list_books')
+
+        authors = Author.objects.all()
+        error_message = "Please correct the errors below."
+        return render(
+            request,
+            'relationship_app/edit_book.html',
+            {'book': book, 'authors': authors, 'error': error_message, 'form_errors': form.errors},
+        )
     
     authors = Author.objects.all()
     context = {'book': book, 'authors': authors}
@@ -306,11 +295,7 @@ def delete_book(request, pk):
     Returns:
         Rendered confirmation page or redirect after deletion
     """
-    try:
-        book = Book.objects.get(pk=pk)
-    except Book.DoesNotExist:
-        return render(request, 'relationship_app/error.html', 
-                    {'error': 'Book not found.'})
+    book = get_object_or_404(Book, pk=pk)
     
     if request.method == 'POST':
         book.delete()
