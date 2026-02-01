@@ -22,13 +22,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-9*o1c^^(5j1+l#d=sf^tyv8zo4gw2z6x4f&6hi&qm4gk--b_fg'
+# Production: set DJANGO_SECRET_KEY to a strong random value.
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-9*o1c^^(5j1+l#d=sf^tyv8zo4gw2z6x4f&6hi&qm4gk--b_fg')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # Default is False; enable locally with: DJANGO_DEBUG=True
 DEBUG = os.getenv('DJANGO_DEBUG', 'False').lower() in ('1', 'true', 'yes', 'on')
 
-ALLOWED_HOSTS = []
+# Production: set DJANGO_ALLOWED_HOSTS="example.com,www.example.com"
+ALLOWED_HOSTS = [h.strip() for h in os.getenv('DJANGO_ALLOWED_HOSTS', '').split(',') if h.strip()]
 
 
 # -----------------------------------------------------------------------------
@@ -57,6 +59,12 @@ SECURE_HSTS_SECONDS = int(os.getenv('DJANGO_SECURE_HSTS_SECONDS', '31536000'))  
 SECURE_HSTS_INCLUDE_SUBDOMAINS = os.getenv('DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS', 'True').lower() in ('1', 'true', 'yes', 'on')
 SECURE_HSTS_PRELOAD = os.getenv('DJANGO_SECURE_HSTS_PRELOAD', 'True').lower() in ('1', 'true', 'yes', 'on')
 
+# If you run behind a reverse proxy/load balancer that terminates TLS, enable this
+# and configure the proxy to send X-Forwarded-Proto: https.
+# Only enable when the proxy is trusted.
+if os.getenv('DJANGO_SECURE_PROXY_SSL_HEADER', 'False').lower() in ('1', 'true', 'yes', 'on'):
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 
 # Application definition
 
@@ -72,8 +80,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'csp.middleware.CSPMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'csp.middleware.CSPMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
