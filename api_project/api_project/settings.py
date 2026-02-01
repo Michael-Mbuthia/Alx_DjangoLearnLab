@@ -44,6 +44,11 @@ INSTALLED_APPS = [
 
 
 REST_FRAMEWORK = {
+    # Authentication
+    #
+    # This project uses DRF Token Authentication. Clients should:
+    # 1) Obtain a token by POSTing username/password to /api/api-token-auth/
+    # 2) Call protected endpoints with: Authorization: Token <token>
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
     ],

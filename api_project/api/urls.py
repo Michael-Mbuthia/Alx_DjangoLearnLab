@@ -10,6 +10,11 @@ router = DefaultRouter()
 router.register(r'books_all', BookViewSet, basename='book_all')
 
 urlpatterns = [
+    # Token Authentication
+    #
+    # Exchange username/password for a token:
+    # POST /api/api-token-auth/  {"username": "...", "password": "..."}
+    # Then authenticate requests with: Authorization: Token <token>
     path('api-token-auth/', obtain_auth_token, name='api-token-auth'),
 
     # Route for the BookList view (ListAPIView)
