@@ -1,0 +1,31 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Example Form</title>
+</head>
+<body>
+    <h1>Example Form</h1>
+
+    {#
+      Demonstrates safe form handling:
+      - Input is validated via ExampleForm (bookshelf/forms.py)
+      - CSRF token is included for POST submissions
+
+      Note: If you use this form for GET-based search, CSRF is not required,
+      but including it for POST examples is best practice.
+    #}
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Submit</button>
+    </form>
+
+    {% if query %}
+        <p><strong>Submitted query:</strong> {{ query }}</p>
+    {% endif %}
+</body>
+</html>
