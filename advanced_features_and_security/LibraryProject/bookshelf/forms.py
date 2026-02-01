@@ -4,6 +4,12 @@ from django.core.exceptions import ValidationError
 from .models import Book
 
 
+class ExampleForm(forms.Form):
+    """Simple example form used for demonstrating validation and safe input handling."""
+
+    query = forms.CharField(max_length=200, required=False)
+
+
 class BookForm(forms.ModelForm):
     """Form for creating/updating Book instances.
 
