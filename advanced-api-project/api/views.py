@@ -1,3 +1,5 @@
+# pyright: reportAttributeAccessIssue=false
+
 """api.views
 
 Generic API views for Book CRUD operations.
