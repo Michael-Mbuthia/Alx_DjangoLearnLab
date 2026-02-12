@@ -22,6 +22,7 @@ How to run:
 
 from django.contrib.auth import get_user_model
 from django.urls import reverse
+from rest_framework import status
 from rest_framework.test import APITestCase
 
 from .models import Author, Book
@@ -44,12 +45,12 @@ class BookViewsTests(APITestCase):
     def test_list_is_public(self):
         url = reverse("book-list")
         response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_detail_is_public(self):
         url = reverse("book-detail", kwargs={"pk": self.book.pk})
         response = self.client.get(url)
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_create_requires_auth(self):
         url = reverse("book-create")
@@ -68,7 +69,7 @@ class BookViewsTests(APITestCase):
             {"title": "Future Book", "publication_year": 9999, "author": self.author.pk},
             format="json",
         )
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_create_succeeds_when_authenticated(self):
         url = reverse("book-create")
@@ -78,7 +79,7 @@ class BookViewsTests(APITestCase):
             {"title": "New Book", "publication_year": 2021, "author": self.author.pk},
             format="json",
         )
-        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_update_requires_auth(self):
         url = reverse("book-update", kwargs={"pk": self.book.pk})
@@ -89,7 +90,7 @@ class BookViewsTests(APITestCase):
         url = reverse("book-update", kwargs={"pk": self.book.pk})
         self.client.force_authenticate(user=self.user)
         response = self.client.patch(url, {"title": "Updated"}, format="json")
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         self.book.refresh_from_db()
         self.assertEqual(self.book.title, "Updated")
@@ -112,7 +113,7 @@ class BookViewsTests(APITestCase):
 
         url = reverse("book-list")
         response = self.client.get(url, {"author": other_author.pk})
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]["title"], "Other Book")
 
@@ -121,7 +122,7 @@ class BookViewsTests(APITestCase):
 
         url = reverse("book-list")
         response = self.client.get(url, {"search": "Searchable"})
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         titles = [item["title"] for item in response.data]
         self.assertIn("A Searchable Title", titles)
 
@@ -131,6 +132,6 @@ class BookViewsTests(APITestCase):
 
         url = reverse("book-list")
         response = self.client.get(url, {"ordering": "-publication_year"})
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         years = [item["publication_year"] for item in response.data]
         self.assertEqual(years, sorted(years, reverse=True))
