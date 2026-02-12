@@ -21,18 +21,16 @@ How to run:
 # pyright: reportAttributeAccessIssue=false
 
 from django.contrib.auth import get_user_model
-from django.test import TestCase
 from django.urls import reverse
-from rest_framework.test import APIClient
+from rest_framework.test import APITestCase
 
 from .models import Author, Book
 
 
-class BookViewsTests(TestCase):
+class BookViewsTests(APITestCase):
     """Endpoint-level tests for Book CRUD + list capabilities."""
 
     def setUp(self):
-        self.client = APIClient()
         self.author = Author.objects.create(name="Test Author")
         self.book = Book.objects.create(
             title="Test Book",
