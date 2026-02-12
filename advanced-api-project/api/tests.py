@@ -57,3 +57,32 @@ class BookViewsTests(TestCase):
             format="json",
         )
         self.assertEqual(response.status_code, 201)
+
+    def test_filtering_by_author(self):
+        other_author = Author.objects.create(name="Other Author")
+        Book.objects.create(title="Other Book", publication_year=2019, author=other_author)
+
+        url = reverse("book-list")
+        response = self.client.get(url, {"author": other_author.pk})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+        self.assertEqual(response.data[0]["title"], "Other Book")
+
+    def test_search_by_title(self):
+        Book.objects.create(title="A Searchable Title", publication_year=2018, author=self.author)
+
+        url = reverse("book-list")
+        response = self.client.get(url, {"search": "Searchable"})
+        self.assertEqual(response.status_code, 200)
+        titles = [item["title"] for item in response.data]
+        self.assertIn("A Searchable Title", titles)
+
+    def test_ordering_by_publication_year_desc(self):
+        Book.objects.create(title="Old", publication_year=1999, author=self.author)
+        Book.objects.create(title="New", publication_year=2023, author=self.author)
+
+        url = reverse("book-list")
+        response = self.client.get(url, {"ordering": "-publication_year"})
+        self.assertEqual(response.status_code, 200)
+        years = [item["publication_year"] for item in response.data]
+        self.assertEqual(years, sorted(years, reverse=True))

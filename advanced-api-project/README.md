@@ -18,11 +18,17 @@ All endpoints are defined in `api/urls.py` and implemented using DRF generic vie
 ### Read (public)
 
 - `GET /books/` — list all books
-  - Optional filters:
+  - Filtering (DjangoFilterBackend):
     - `?author=<author_id>`
-    - `?year=<publication_year>`
-    - `?q=<title_substring>`
-    - `?ordering=publication_year` or `?ordering=-publication_year`
+    - `?author__name__icontains=<substring>`
+    - `?title__icontains=<substring>`
+    - `?publication_year=<year>`
+    - `?publication_year__gte=<year>`
+    - `?publication_year__lte=<year>`
+  - Search (SearchFilter):
+    - `?search=<text>` (searches title and author name)
+  - Ordering (OrderingFilter):
+    - `?ordering=title` or `?ordering=-publication_year`
 - `GET /books/<pk>/` — retrieve a single book by id
 
 ### Write (authenticated)
@@ -50,6 +56,17 @@ You can also use Basic Auth from tools like curl/Postman.
 ### List books (no auth)
 
 - `curl http://127.0.0.1:8000/books/`
+
+### Filter / search / ordering examples
+
+- Filter by author id:
+  - `curl "http://127.0.0.1:8000/books/?author=1"`
+- Filter by title substring:
+  - `curl "http://127.0.0.1:8000/books/?title__icontains=potter"`
+- Search (title + author name):
+  - `curl "http://127.0.0.1:8000/books/?search=potter"`
+- Order by newest publication year first:
+  - `curl "http://127.0.0.1:8000/books/?ordering=-publication_year"`
 
 ### Create a book (auth required)
 

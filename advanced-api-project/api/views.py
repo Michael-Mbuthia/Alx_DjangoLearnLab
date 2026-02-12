@@ -21,7 +21,8 @@ Customization hooks used here:
 
 from __future__ import annotations
 
-from rest_framework import generics
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, generics
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 
 from .models import Book
@@ -33,38 +34,43 @@ class BookListView(generics.ListAPIView):
 
     """List all books.
 
-    Public (no auth required).
+    Filtering / Search / Ordering:
+        This view integrates DRF’s filtering capabilities using:
+        - DjangoFilterBackend: structured filtering via query params
+        - SearchFilter: text search via `?search=`
+        - OrderingFilter: ordering via `?ordering=`
 
-    Optional filters (query params):
-        - author: integer author id
-        - year: publication_year exact match
-        - q: substring match on title
-        - ordering: a model field name, e.g. `publication_year` or `-publication_year`
+    Examples:
+        - Filter by author id:           /books/?author=1
+        - Filter by author name:         /books/?author__name__icontains=rowling
+        - Filter by title substring:     /books/?title__icontains=potter
+        - Filter by year (exact):        /books/?publication_year=2020
+        - Filter by year range:          /books/?publication_year__gte=2000&publication_year__lte=2020
+        - Search:                        /books/?search=potter
+        - Order by year desc:            /books/?ordering=-publication_year
     """
 
+    queryset = Book.objects.select_related("author").all()
     serializer_class = BookSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
 
-    def get_queryset(self):
-        queryset = Book.objects.select_related("author").all()
+    # DRF filter backends (also configured globally in REST_FRAMEWORK)
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
 
-        author_id = self.request.query_params.get("author")
-        if author_id:
-            queryset = queryset.filter(author_id=author_id)
+    # DjangoFilterBackend
+    filterset_fields = {
+        "title": ["exact", "icontains"],
+        "publication_year": ["exact", "gte", "lte"],
+        "author": ["exact"],
+        "author__name": ["exact", "icontains"],
+    }
 
-        year = self.request.query_params.get("year")
-        if year:
-            queryset = queryset.filter(publication_year=year)
+    # SearchFilter
+    search_fields = ["title", "author__name"]
 
-        query = self.request.query_params.get("q")
-        if query:
-            queryset = queryset.filter(title__icontains=query)
-
-        ordering = self.request.query_params.get("ordering")
-        if ordering:
-            queryset = queryset.order_by(ordering)
-
-        return queryset
+    # OrderingFilter
+    ordering_fields = ["id", "title", "publication_year", "author"]
+    ordering = ["title"]
 
 
 class BookDetailView(generics.RetrieveAPIView):
