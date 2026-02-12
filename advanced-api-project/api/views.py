@@ -21,8 +21,9 @@ Customization hooks used here:
 
 from __future__ import annotations
 
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, generics
+from django_filters import rest_framework
+from rest_framework import filters
+from rest_framework import generics
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 
 from .models import Book
@@ -55,7 +56,11 @@ class BookListView(generics.ListAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     # DRF filter backends (also configured globally in REST_FRAMEWORK)
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filter_backends = [
+        rest_framework.DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    ]
 
     # DjangoFilterBackend
     filterset_fields = {
