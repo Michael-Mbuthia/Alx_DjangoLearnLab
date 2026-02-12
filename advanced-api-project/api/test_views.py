@@ -63,7 +63,7 @@ class BookViewsTests(APITestCase):
 
     def test_create_rejects_future_publication_year(self):
         url = reverse("book-create")
-        self.client.force_authenticate(user=self.user)
+        self.client.login(username="tester", password="pass12345")
         response = self.client.post(
             url,
             {"title": "Future Book", "publication_year": 9999, "author": self.author.pk},
@@ -73,7 +73,7 @@ class BookViewsTests(APITestCase):
 
     def test_create_succeeds_when_authenticated(self):
         url = reverse("book-create")
-        self.client.force_authenticate(user=self.user)
+        self.client.login(username="tester", password="pass12345")
         response = self.client.post(
             url,
             {"title": "New Book", "publication_year": 2021, "author": self.author.pk},
@@ -88,7 +88,7 @@ class BookViewsTests(APITestCase):
 
     def test_update_succeeds_when_authenticated(self):
         url = reverse("book-update", kwargs={"pk": self.book.pk})
-        self.client.force_authenticate(user=self.user)
+        self.client.login(username="tester", password="pass12345")
         response = self.client.patch(url, {"title": "Updated"}, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -102,7 +102,7 @@ class BookViewsTests(APITestCase):
 
     def test_delete_succeeds_when_authenticated(self):
         url = reverse("book-delete", kwargs={"pk": self.book.pk})
-        self.client.force_authenticate(user=self.user)
+        self.client.login(username="tester", password="pass12345")
         response = self.client.delete(url)
         self.assertIn(response.status_code, (200, 202, 204))
         self.assertFalse(Book.objects.filter(pk=self.book.pk).exists())
