@@ -58,6 +58,32 @@ class BookViewsTests(TestCase):
         )
         self.assertEqual(response.status_code, 201)
 
+    def test_update_requires_auth(self):
+        url = reverse("book-update", kwargs={"pk": self.book.pk})
+        response = self.client.patch(url, {"title": "Updated"}, format="json")
+        self.assertIn(response.status_code, (401, 403))
+
+    def test_update_succeeds_when_authenticated(self):
+        url = reverse("book-update", kwargs={"pk": self.book.pk})
+        self.client.force_authenticate(user=self.user)
+        response = self.client.patch(url, {"title": "Updated"}, format="json")
+        self.assertEqual(response.status_code, 200)
+
+        self.book.refresh_from_db()
+        self.assertEqual(self.book.title, "Updated")
+
+    def test_delete_requires_auth(self):
+        url = reverse("book-delete", kwargs={"pk": self.book.pk})
+        response = self.client.delete(url)
+        self.assertIn(response.status_code, (401, 403))
+
+    def test_delete_succeeds_when_authenticated(self):
+        url = reverse("book-delete", kwargs={"pk": self.book.pk})
+        self.client.force_authenticate(user=self.user)
+        response = self.client.delete(url)
+        self.assertIn(response.status_code, (200, 202, 204))
+        self.assertFalse(Book.objects.filter(pk=self.book.pk).exists())
+
     def test_filtering_by_author(self):
         other_author = Author.objects.create(name="Other Author")
         Book.objects.create(title="Other Book", publication_year=2019, author=other_author)

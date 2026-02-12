@@ -51,6 +51,23 @@ This project includes DRF’s browsable API login routes:
 
 You can also use Basic Auth from tools like curl/Postman.
 
+## Testing
+
+This project uses Django’s built-in test framework (based on Python’s `unittest`).
+
+Test database behavior:
+- When you run tests, Django automatically creates a separate test database (e.g. `test_db.sqlite3` for SQLite), runs migrations, executes tests, then destroys it.
+- This keeps your development database (`db.sqlite3`) safe from test data.
+
+Run the API tests:
+- `C:/Users/jm744/Documents/Alx_DjangoLearnLab/.venv/Scripts/python.exe manage.py test api`
+
+What the tests cover:
+- Public read access for list/detail endpoints
+- Auth-required write access for create/update/delete endpoints
+- Model/serializer validation (future `publication_year` is rejected)
+- Filtering/search/ordering behaviors on the list endpoint
+
 ## Manual testing examples
 
 ### List books (no auth)
