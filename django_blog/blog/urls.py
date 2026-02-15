@@ -22,4 +22,17 @@ urlpatterns = [
     path("posts/<int:pk>/", views.PostDetailView.as_view(), name="post-detail"),
     path("posts/<int:pk>/edit/", views.PostUpdateView.as_view(), name="post-update"),
     path("posts/<int:pk>/delete/", views.PostDeleteView.as_view(), name="post-delete"),
+
+    # Legacy/alternate paths (kept as aliases)
+    path("post/new/", views.PostCreateView.as_view(), name="post-create-legacy"),
+    path(
+        "post/<int:pk>/update/",
+        views.PostUpdateView.as_view(),
+        name="post-update-legacy",
+    ),
+    path(
+        "post/<int:pk>/delete/",
+        views.PostDeleteView.as_view(),
+        name="post-delete-legacy",
+    ),
 ]
