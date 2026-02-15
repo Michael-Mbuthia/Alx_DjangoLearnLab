@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
 
-from .models import Post
+from .models import Comment, Post
 
 
 class AuthenticationTests(TestCase):
@@ -104,3 +104,62 @@ class PostCrudTests(TestCase):
 		)
 		self.assertEqual(response.status_code, 403)
 		self.assertTrue(Post.objects.filter(pk=self.post.pk).exists())
+
+
+class CommentCrudTests(TestCase):
+	def setUp(self):
+		self.author = User.objects.create_user(
+			username='author',
+			email='author@example.com',
+			password='StrongPass123!@#',
+		)
+		self.other_user = User.objects.create_user(
+			username='other',
+			email='other@example.com',
+			password='StrongPass123!@#',
+		)
+		self.post = Post.objects.create(
+			title='Post',
+			content='Content',
+			author=self.author,
+		)
+		self.comment = Comment.objects.create(
+			post=self.post,
+			author=self.author,
+			content='First',
+		)
+
+	def test_comment_create_requires_login(self):
+		response = self.client.post(
+			reverse('comment-create', kwargs={'post_id': self.post.pk}),
+			{'content': 'Hello'},
+		)
+		self.assertEqual(response.status_code, 302)
+		self.assertIn('/login/', response['Location'])
+		self.assertFalse(Comment.objects.filter(content='Hello').exists())
+
+	def test_comment_create_sets_author_and_post(self):
+		self.client.login(username='other', password='StrongPass123!@#')
+		response = self.client.post(
+			reverse('comment-create', kwargs={'post_id': self.post.pk}),
+			{'content': 'Hello'},
+		)
+		self.assertEqual(response.status_code, 302)
+		created = Comment.objects.get(content='Hello')
+		self.assertEqual(created.author, self.other_user)
+		self.assertEqual(created.post, self.post)
+
+	def test_comment_update_forbidden_for_non_author(self):
+		self.client.login(username='other', password='StrongPass123!@#')
+		response = self.client.get(
+			reverse('comment-update', kwargs={'pk': self.comment.pk})
+		)
+		self.assertEqual(response.status_code, 403)
+
+	def test_comment_delete_forbidden_for_non_author(self):
+		self.client.login(username='other', password='StrongPass123!@#')
+		response = self.client.post(
+			reverse('comment-delete', kwargs={'pk': self.comment.pk})
+		)
+		self.assertEqual(response.status_code, 403)
+		self.assertTrue(Comment.objects.filter(pk=self.comment.pk).exists())

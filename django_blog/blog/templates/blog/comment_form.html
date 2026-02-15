@@ -1,0 +1,16 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}Edit Comment{% endblock %}
+
+{% block content %}
+  <p><a href="{% url 'post-detail' object.post.pk %}">Back to post</a></p>
+
+  <h1>Edit comment</h1>
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {{ form.as_p }}
+    <button type="submit">Save</button>
+  </form>
+{% endblock %}
