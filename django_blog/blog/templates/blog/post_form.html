@@ -1,0 +1,16 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}{% if object %}Edit Post{% else %}New Post{% endif %}{% endblock %}
+
+{% block content %}
+  <p><a href="{% url 'post-list' %}">Back to posts</a></p>
+
+  <h1>{% if object %}Edit Post{% else %}New Post{% endif %}</h1>
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {{ form.as_p }}
+    <button type="submit">Save</button>
+  </form>
+{% endblock %}
