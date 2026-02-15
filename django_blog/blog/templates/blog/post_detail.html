@@ -14,6 +14,15 @@
     <p>{{ object.content }}</p>
   </div>
 
+  {% if object.tags.all %}
+    <p>
+      Tags:
+      {% for tag in object.tags.all %}
+        <a href="{% url 'tag-posts' tag.name %}">{{ tag.name }}</a>{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    </p>
+  {% endif %}
+
   {% if user.is_authenticated and user == object.author %}
     <p>
       <a href="{% url 'post-update' object.pk %}">Edit</a>

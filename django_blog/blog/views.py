@@ -2,12 +2,13 @@ from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.db.models import Q
 from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
 from .forms import CommentForm, PostForm, UserRegistrationForm, UserUpdateForm
-from .models import Comment, Post
+from .models import Comment, Post, Tag
 
 
 def register(request):
@@ -44,10 +45,12 @@ class PostListView(ListView):
 	model = Post
 	context_object_name = 'posts'
 	ordering = ['-published_date']
+	template_name = 'blog/post_list.html'
 
 
 class PostDetailView(DetailView):
 	model = Post
+	template_name = 'blog/post_detail.html'
 
 	def get_context_data(self, **kwargs):
 		context = super().get_context_data(**kwargs)
@@ -59,6 +62,7 @@ class PostDetailView(DetailView):
 class PostCreateView(LoginRequiredMixin, CreateView):
 	model = Post
 	form_class = PostForm
+	template_name = 'blog/post_form.html'
 
 	def form_valid(self, form):
 		form.instance.author = self.request.user
@@ -72,6 +76,7 @@ class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 	model = Post
 	form_class = PostForm
 	raise_exception = True
+	template_name = 'blog/post_form.html'
 
 	def test_func(self):
 		post = self.get_object()
@@ -89,6 +94,7 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 	model = Post
 	success_url = reverse_lazy('post-list')
 	raise_exception = True
+	template_name = 'blog/post_confirm_delete.html'
 
 	def test_func(self):
 		post = self.get_object()
@@ -116,6 +122,7 @@ class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 	model = Comment
 	form_class = CommentForm
 	raise_exception = True
+	template_name = 'blog/comment_form.html'
 
 	def test_func(self):
 		comment = self.get_object()
@@ -128,6 +135,7 @@ class CommentUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 	model = Comment
 	raise_exception = True
+	template_name = 'blog/comment_confirm_delete.html'
 
 	def test_func(self):
 		comment = self.get_object()
@@ -135,3 +143,52 @@ class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
 	def get_success_url(self):
 		return reverse('post-detail', kwargs={'pk': self.object.post.pk})
+
+
+class TaggedPostListView(ListView):
+	model = Post
+	context_object_name = 'posts'
+	template_name = 'blog/tag_posts.html'
+
+	def get_queryset(self):
+		tag_name = self.kwargs['tag_name']
+		return (
+			Post.objects.filter(tags__name__iexact=tag_name)
+			.select_related('author')
+			.prefetch_related('tags')
+			.order_by('-published_date')
+			.distinct()
+		)
+
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		context['tag_name'] = self.kwargs['tag_name']
+		return context
+
+
+class PostSearchView(ListView):
+	model = Post
+	context_object_name = 'posts'
+	template_name = 'blog/search_results.html'
+
+	def get_queryset(self):
+		query = (self.request.GET.get('q') or '').strip()
+		if not query:
+			return Post.objects.none()
+
+		return (
+			Post.objects.filter(
+				Q(title__icontains=query)
+				| Q(content__icontains=query)
+				| Q(tags__name__icontains=query)
+			)
+			.select_related('author')
+			.prefetch_related('tags')
+			.order_by('-published_date')
+			.distinct()
+		)
+
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		context['query'] = (self.request.GET.get('q') or '').strip()
+		return context

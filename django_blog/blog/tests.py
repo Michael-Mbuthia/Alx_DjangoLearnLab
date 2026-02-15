@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
 
-from .models import Comment, Post
+from .models import Comment, Post, Tag
 
 
 class AuthenticationTests(TestCase):
@@ -84,11 +84,14 @@ class PostCrudTests(TestCase):
 		self.client.login(username='other', password='StrongPass123!@#')
 		response = self.client.post(
 			reverse('post-create'),
-			{'title': 'New', 'content': 'Post'},
+			{'title': 'New', 'content': 'Post', 'tags': 'django, python'},
 		)
 		self.assertEqual(response.status_code, 302)
 		created = Post.objects.get(title='New')
 		self.assertEqual(created.author, self.other_user)
+		self.assertEqual(created.tags.count(), 2)
+		self.assertTrue(Tag.objects.filter(name='django').exists())
+		self.assertTrue(Tag.objects.filter(name='python').exists())
 
 	def test_update_forbidden_for_non_author(self):
 		self.client.login(username='other', password='StrongPass123!@#')
@@ -104,6 +107,20 @@ class PostCrudTests(TestCase):
 		)
 		self.assertEqual(response.status_code, 403)
 		self.assertTrue(Post.objects.filter(pk=self.post.pk).exists())
+
+	def test_tag_filter_view_returns_tagged_posts(self):
+		tag = Tag.objects.create(name='web')
+		self.post.tags.add(tag)
+		response = self.client.get(reverse('tag-posts', kwargs={'tag_name': 'web'}))
+		self.assertEqual(response.status_code, 200)
+		self.assertContains(response, 'Hello')
+
+	def test_search_finds_posts_by_title_and_tag(self):
+		tag = Tag.objects.create(name='django')
+		self.post.tags.add(tag)
+		response = self.client.get(reverse('post-search') + '?q=django')
+		self.assertEqual(response.status_code, 200)
+		self.assertContains(response, 'Hello')
 
 
 class CommentCrudTests(TestCase):
