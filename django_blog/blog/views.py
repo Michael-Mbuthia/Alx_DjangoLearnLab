@@ -166,6 +166,30 @@ class TaggedPostListView(ListView):
 		return context
 
 
+class PostByTagListView(ListView):
+	model = Post
+	context_object_name = 'posts'
+	template_name = 'blog/tag_posts.html'
+
+	def get_queryset(self):
+		tag_slug = self.kwargs['tag_slug']
+		return (
+			Post.objects.filter(tags__slug=tag_slug)
+			.select_related('author')
+			.prefetch_related('tags')
+			.order_by('-published_date')
+			.distinct()
+		)
+
+	def get_context_data(self, **kwargs):
+		context = super().get_context_data(**kwargs)
+		tag_slug = self.kwargs['tag_slug']
+		tag = Tag.objects.filter(slug=tag_slug).first()
+		context['tag'] = tag
+		context['tag_name'] = tag.name if tag else tag_slug
+		return context
+
+
 class PostSearchView(ListView):
 	model = Post
 	context_object_name = 'posts'

@@ -111,7 +111,7 @@ class PostCrudTests(TestCase):
 	def test_tag_filter_view_returns_tagged_posts(self):
 		tag = Tag.objects.create(name='web')
 		self.post.tags.add(tag)
-		response = self.client.get(reverse('tag-posts', kwargs={'tag_name': 'web'}))
+		response = self.client.get(reverse('post-by-tag', kwargs={'tag_slug': tag.slug}))
 		self.assertEqual(response.status_code, 200)
 		self.assertContains(response, 'Hello')
 

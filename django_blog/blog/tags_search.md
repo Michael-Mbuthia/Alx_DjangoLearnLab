@@ -27,11 +27,11 @@ Implementation is in [blog/forms.py](blog/forms.py) (`PostForm`):
 
 URL:
 
-- `/tags/<tag_name>/`
+- `/tags/<tag_slug>/`
 
 Example:
 
-- `/tags/django/`
+- `/tags/django/` (where `django` is the tag slug)
 
 ## Search
 

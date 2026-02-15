@@ -18,7 +18,7 @@
     <p>
       Tags:
       {% for tag in object.tags.all %}
-        <a href="{% url 'tag-posts' tag.name %}">{{ tag.name }}</a>{% if not forloop.last %},{% endif %}
+        <a href="{% url 'post-by-tag' tag.slug %}">{{ tag.name }}</a>{% if not forloop.last %},{% endif %}
       {% endfor %}
     </p>
   {% endif %}
