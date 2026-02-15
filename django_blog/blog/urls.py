@@ -6,7 +6,7 @@ from . import views
 urlpatterns = [
     path(
         "login/",
-        auth_views.LoginView.as_view(template_name="registration/login.html"),
+        auth_views.LoginView.as_view(template_name="blog/login.html"),
         name="login",
     ),
     path(
