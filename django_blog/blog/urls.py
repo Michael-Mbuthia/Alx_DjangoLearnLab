@@ -39,6 +39,23 @@ urlpatterns = [
         name="comment-delete",
     ),
 
+    # Legacy/alternate comment paths (kept as aliases)
+    path(
+        "post/<int:pk>/comments/new/",
+        views.CommentCreateView.as_view(),
+        name="comment-create-legacy",
+    ),
+    path(
+        "comment/<int:pk>/update/",
+        views.CommentUpdateView.as_view(),
+        name="comment-update-legacy",
+    ),
+    path(
+        "comment/<int:pk>/delete/",
+        views.CommentDeleteView.as_view(),
+        name="comment-delete-legacy",
+    ),
+
     # Legacy/alternate paths (kept as aliases)
     path("post/new/", views.PostCreateView.as_view(), name="post-create-legacy"),
     path(
