@@ -1,6 +1,9 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from django.forms import widgets
+
+from taggit.forms import TagWidget
 
 from .models import Comment, Post, Tag
 
@@ -23,12 +26,16 @@ class UserUpdateForm(forms.ModelForm):
 class PostForm(forms.ModelForm):
     tags = forms.CharField(
         required=False,
+        widget=TagWidget(),
         help_text="Comma-separated tags (e.g. django, web, python)",
     )
 
     class Meta:
         model = Post
         fields = ("title", "content")
+        widgets = {
+            'content': widgets.Textarea(),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
